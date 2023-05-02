@@ -1,9 +1,11 @@
 from vk_api.longpoll import VkEventType, VkLongPoll
-from bot import bot
-from db import create_table_seen_person, delete_table_seen_person
-from config import vk_token
+from bot import Bot
+from db import DatabaseManager
 
 def chat_bot():
+    bot = Bot()
+    db_manager = DatabaseManager()
+
     with VkLongPoll(bot.vk_session):
         try:
             for event in bot.longpoll.listen():
@@ -16,8 +18,8 @@ def chat_bot():
                         bot.looking_for_persons(user_id)
                         bot.show_found_person(user_id)
                     elif request == "удалить" or request == "d":
-                        delete_table_seen_person()
-                        create_table_seen_person()
+                        db_manager.delete_table_seen_person()
+                        db_manager.create_table_seen_person()
                         bot.sending_messages(
                             user_id, f' База данных очищена! Сейчас наберите "Поиск" или F '
                         )
@@ -37,6 +39,6 @@ def chat_bot():
                         )
         except Exception as e:
             print(f"Error: {e}")
-            
-bot.vk_session.auth()
-chat_bot()
+
+if __name__ == "__main__":
+    chat_bot()
